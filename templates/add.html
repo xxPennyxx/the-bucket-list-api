@@ -1,0 +1,190 @@
+{% extends 'base.html' %}
+
+{% block title %}Add A New Place{% endblock %}
+
+{% block content %}
+<style>
+  /* ===== Background Styling ===== */
+  body {
+    background: url("https://images.pexels.com/photos/25189815/pexels-photo-25189815.jpeg") no-repeat center center/cover;
+    min-height: 100vh;
+    background-attachment: fixed;
+    color: white;
+  }
+
+  /* ===== Overlay for readability ===== */
+  .bg-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    z-index: 0;
+  }
+
+  /* ===== Container content ===== */
+  .content-wrapper {
+    position: relative;
+    z-index: 2;
+    padding: 5rem 2rem;
+    display: flex;
+    justify-content: center;
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  /* ===== Heading ===== */
+  h1 {
+    font-weight: 800;
+    font-size: 2.5rem;
+    text-shadow: 2px 4px 10px rgba(0, 0, 0, 0.8);
+    margin-bottom: 2rem;
+    text-align: center;
+    animation: slideDown 0.5s ease-out;
+  }
+
+  /* ===== Card styling ===== */
+  .form-card {
+    background: rgba(20, 20, 20, 0.85);
+    padding: 2rem;
+    border-radius: 12px;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 600px;
+    animation: slideUp 1s ease-out;
+  }
+
+  /* ===== Animations ===== */
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2rem;
+    }
+    .form-card {
+      padding: 1.5rem;
+    }
+  }
+</style>
+
+<div class="bg-overlay"></div>
+<div class="content-wrapper">
+  <div class="form-card">
+    <h1>Add a New Place</h1>
+    <form id="addPlaceForm">
+      <div class="mb-3">
+        <input type="text" class="form-control" id="name" placeholder="Name" required>
+      </div>
+      <div class="row mb-3">
+        <div class="col">
+          <input type="text" class="form-control" id="city" placeholder="City" required>
+        </div>
+        <div class="col">
+          <input type="text" class="form-control" id="country" placeholder="Country" required>
+        </div>
+      </div>
+      <div class="mb-3">
+        <input type="url" class="form-control" id="location" placeholder="Google Maps URL" required>
+      </div>
+      <div class="row mb-3">
+        <div class="col">
+          <input type="text" class="form-control" id="open" placeholder="Opening Time e.g. 8AM" required>
+        </div>
+        <div class="col">
+          <input type="text" class="form-control" id="close" placeholder="Closing Time e.g. 5:30PM" required>
+        </div>
+      </div>
+      <div class="mb-3">
+        <select class="form-select" id="rating" required>
+          <option value="">Select Rating</option>
+          <option value="⭐">⭐</option>
+          <option value="⭐⭐">⭐⭐</option>
+          <option value="⭐⭐⭐">⭐⭐⭐</option>
+          <option value="⭐⭐⭐⭐">⭐⭐⭐⭐</option>
+          <option value="⭐⭐⭐⭐⭐">⭐⭐⭐⭐⭐</option>
+        </select>
+      </div>
+      <div class="mb-3">
+        <textarea class="form-control" id="review" placeholder="Review" rows="3" required></textarea>
+      </div>
+      <button type="submit" class="btn btn-primary w-100">Add Place</button>
+    </form>
+
+    <p class="text-center mt-3">
+      <a href="{{ url_for('places') }}" class="btn btn-warning">See all places</a>
+    </p>
+  </div>
+</div>
+
+<script>
+async function loadPlaceForEdit(placeId) {
+  const res = await fetch(`/places/${placeId}`);
+  if (!res.ok) return
+  const data = await res.json();
+  const place = data.place;
+
+  document.getElementById("name").value = place.name;
+  document.getElementById("city").value = place.city;
+  document.getElementById("country").value = place.country;
+  document.getElementById("location").value = place.location;
+  document.getElementById("open").value = place.open;
+  document.getElementById("close").value = place.close;
+  document.getElementById("rating").value = place.rating;
+  document.getElementById("review").value = place.review;
+
+  // Change button text
+  document.querySelector("#addPlaceForm button[type='submit']").textContent = "Update Place";
+}
+
+function getQueryParam(name) {
+  return new URLSearchParams(window.location.search).get(name);
+}
+
+// Check if we're in edit mode
+const editId = getQueryParam("id");
+if (editId) {
+  loadPlaceForEdit(editId);
+}
+
+// Submit handler
+document.getElementById("addPlaceForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const data = {
+    name: document.getElementById("name").value,
+    city: document.getElementById("city").value,
+    country: document.getElementById("country").value,
+    location: document.getElementById("location").value,
+    open: document.getElementById("open").value,
+    close: document.getElementById("close").value,
+    rating: document.getElementById("rating").value,
+    review: document.getElementById("review").value
+  };
+
+  let url = "/add_place";
+  let method = "POST";
+
+  if (editId) {
+    url = `/places/${editId}`;
+    method = "PUT"; // full update
+  }
+
+  const res = await fetch(url, {
+    method,
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(data)
+  });
+  const result = await res.json();
+  if (res.ok) window.location.href = "/places";
+});
+</script>
+
+{% endblock %}

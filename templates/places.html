@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+
+{% block title %}All Places{% endblock %}
+
+{% block content %}
+<style>
+  body {
+    background: url("https://images.pexels.com/photos/1307698/pexels-photo-1307698.jpeg") no-repeat center center/cover;
+    min-height: 100vh;
+    background-attachment: fixed;
+    color: white;
+  }
+
+  a.hello:hover{
+    text-decoration: none !important;
+  }
+
+  .table a:hover {
+  color: #bcbbb9;  
+}
+
+  .bg-overlay {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 0;
+  }
+
+  /* ===== Container content ===== */
+  .content-wrapper {
+    position: relative;
+    z-index: 2;
+    padding: 5rem 2rem;
+    text-align: center;
+    animation: fadeIn 0.5s ease-out;
+  }
+
+  /* ===== Heading styling ===== */
+  h1 {
+    font-weight: 800;
+    font-size: 3.5rem;
+    text-shadow: 2px 4px 10px rgba(0, 0, 0, 0.8);
+    margin-bottom: 2.5rem;
+    letter-spacing: 1px;
+    animation: slideDown 0.5s ease-out;
+  }
+
+  /* ===== Table styling ===== */
+  table {
+    background: rgba(20, 20, 20, 0.8);
+    border-collapse: collapse;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 0 auto;
+    width: 85%;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5);
+    animation: slideUp 1.5s ease-out;
+  }
+
+  th {
+    color: #333 !important;
+    background-color: #ffd166;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 1rem 1.5rem;
+    border-bottom: 2px solid rgba(255, 209, 102, 0.4);
+  }
+
+  td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  tr:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: background-color 0.3s;
+  }
+
+  a {
+    color: #ffd166;
+    font-weight: 600;
+  }
+
+  a:hover {
+  text-decoration: none; /* remove underline */
+  color: #ffd166; /* keep original color */
+}
+
+  .btn {
+    font-weight: 600;
+    padding: 0.75rem 2rem;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-40px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 768px) {
+    table {
+      width: 100%;
+      font-size: 0.9rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+    }
+  }
+</style>
+
+<div class="bg-overlay"></div>
+<div class="content-wrapper">
+  <h1>All Places</h1>
+  <table id="placesTable">
+    <thead>
+      <tr>
+        <th>Name</th><th>City</th><th>Country</th><th>Maps</th><th>Open</th><th>Close</th><th>Rating</th><th>Review</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <p style="margin-top:1rem;">
+    <a href="{{ url_for('add_page') }}" class="btn btn-warning">Add new place</a>
+    <a href="{{ url_for('home') }}" class="btn btn-secondary">Return to index</a>
+  </p>
+</div>
+
+<script>
+async function loadPlaces() {
+  const res = await fetch("/all_places");
+  const data = await res.json();
+  const tbody = document.querySelector("#placesTable tbody");
+  tbody.innerHTML = "";
+  data.places.forEach(place => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${place.name}</td>
+        <td>${place.city}</td>
+        <td>${place.country}</td>
+        <td><a href="${place.location}" target="_blank">Maps</a></td>
+        <td>${place.open}</td>
+        <td>${place.close}</td>
+        <td>${place.rating}</td>
+        <td>${place.review}</td>
+        <td>
+          <button class="btn btn-success edit" style="margin:5px;" onclick="editPlace(${place.id})">Edit</button>
+          <button class="btn btn-danger delete" style="margin:5px;" onclick="deletePlace(${place.id})">Delete</button>
+        </td>
+      </tr>`;
+  });
+}
+
+async function deletePlace(id) {
+  if (!confirm("Are you sure you want to delete this place?")) return;
+  const res = await fetch(`/places/${id}`, { method: "DELETE" });
+  const data = await res.json();
+  loadPlaces();
+}
+
+async function editPlace(id) {
+  // Redirect to add.html with ?id=...
+  window.location.href = `/add?id=${id}`;
+}
+
+  loadPlaces();
+
+</script>
+{% endblock %}

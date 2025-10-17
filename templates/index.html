@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}The Bucket List{% endblock %}
+
+{% block content %}
+<style>
+  .hero-section {
+    position: relative;
+    background: url("https://images.pexels.com/photos/1285625/pexels-photo-1285625.jpeg") no-repeat center center/cover;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+    overflow: hidden;
+  }
+
+  /* Dark overlay for readability */
+  .hero-section::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    animation: fadeIn 0.25s forwards;
+  }
+
+  /* Content animations */
+  .hero-content {
+    position: relative;
+    z-index: 2;
+    opacity: 0;
+    transform: translateY(30px);
+    animation: slideUp 1.5s ease-out forwards;
+    animation-delay: 0.25s;
+  }
+
+  /* Animations */
+  @keyframes fadeIn {
+    to { opacity: 1; }
+  }
+  @keyframes slideUp {
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+</style>
+
+<div class="hero-section text-center">
+  <div class="container hero-content">
+    <h1 class="display-2 fw-bold mb-4">The Bucket List</h1>
+    <p class="lead">
+      Explore the best coffee spots, hidden gems, and wonders around the world.
+    </p>
+    <hr class="my-4 bg-light" />
+    <p>
+      From cozy alleyway coffee bars in Tokyo to sun-lit terraces in Lisbon,
+      this is where I collect every must-visit spot that fuels my wanderlust.
+      Each pin on the map tells a story — a favorite brew, a view worth pausing for,
+      and the memory of a perfect afternoon.
+    </p>
+    <p>
+      This project started as a way to keep track of places I loved (and those I'm yet to explore).
+      Now it's become my digital travel journal — a living, growing list of cafés and corners
+      that make every city feel like home.
+    </p>
+    <a
+      class="btn btn-warning btn-lg mt-3 shadow"
+      href="{{ url_for('places') }}"
+      role="button"
+      >Show Me!</a>
+  </div>
+</div>
+{% endblock %}
